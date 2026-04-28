@@ -6,7 +6,9 @@ import com.sanfran.community.domain.model.exception.ValidationException;
 import com.sanfran.community.domain.model.vo.DomainValidators;
 import com.sanfran.community.domain.usecase.port.UserRepository;
 
+import java.util.Locale;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 public class UserUseCase {
@@ -77,13 +79,13 @@ public class UserUseCase {
 
     private void ensureUniqueConstraints(User user, UUID currentId) {
         repository.findByEmailIgnoreCase(user.email())
-                .filter(existing -> !existing.id().equals(currentId))
+                .filter(existing -> !Objects.equals(existing.id(), currentId))
                 .ifPresent(existing -> {
                     throw new ValidationException("email", "Email already exists.");
                 });
 
         repository.findByIdDocumentIgnoreCase(user.idDocument())
-                .filter(existing -> !existing.id().equals(currentId))
+                .filter(existing -> !Objects.equals(existing.id(), currentId))
                 .ifPresent(existing -> {
                     throw new ValidationException("idDocument", "ID document already exists.");
                 });
@@ -96,9 +98,9 @@ public class UserUseCase {
 
         return new User(
                 user.id(),
-                user.names(),
-                user.idDocument(),
-                user.email(),
+            user.names() == null ? null : user.names().trim(),
+            user.idDocument() == null ? null : user.idDocument().trim(),
+            user.email() == null ? null : user.email().trim().toLowerCase(Locale.ROOT),
                 user.password(),
                 DomainValidators.normalizeRole(user.role()),
                 DomainValidators.normalizeSubRole(user.subRole())
