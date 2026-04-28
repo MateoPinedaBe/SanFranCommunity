@@ -54,7 +54,14 @@ public class FacilityController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<FacilityResponse>>> findAll(@RequestParam(required = false) String name) {
+    public ResponseEntity<ApiResponse<?>> findAll(
+            @RequestParam(required = false) UUID id,
+            @RequestParam(required = false) String name
+    ) {
+        if (id != null) {
+            return ResponseEntity.ok(ApiResponse.success(toResponse(useCase.findById(id))));
+        }
+
         List<Facility> data = (name == null || name.isBlank()) ? useCase.findAll() : useCase.findByName(name);
         return ResponseEntity.ok(ApiResponse.success(data.stream().map(this::toResponse).toList()));
     }

@@ -15,6 +15,7 @@ import java.util.UUID;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -60,5 +61,18 @@ class FacilityControllerTest {
             .andExpect(jsonPath("$.status").value(400))
             .andExpect(jsonPath("$.data.error").value("Validation Error"))
             .andExpect(jsonPath("$.data.field").value("name"));
+    }
+
+    @Test
+    void findByIdShouldAcceptQueryParam() throws Exception {
+        UUID id = UUID.randomUUID();
+        Facility facility = new Facility(id, "Salon Social", "Descripcion", "https://example.com/salon.jpg", 100);
+        when(useCase.findById(id)).thenReturn(facility);
+
+        mockMvc.perform(get("/api/v1/facilities").param("id", id.toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value(200))
+                .andExpect(jsonPath("$.data.id").value(id.toString()))
+                .andExpect(jsonPath("$.data.name").value("Salon Social"));
     }
 }

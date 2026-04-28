@@ -66,6 +66,20 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.data[0].names").value("Ana Maria"));
     }
 
+            @Test
+            void findByIdShouldAcceptQueryParam() throws Exception {
+            UUID id = UUID.randomUUID();
+            when(useCase.findById(id)).thenReturn(
+                new User(id, "Ana Maria", "CC12345", "ana@test.com", "Password123", "ADMIN", "OWNER")
+            );
+
+            mockMvc.perform(get("/api/v1/users").param("id", id.toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value(200))
+                .andExpect(jsonPath("$.data.id").value(id.toString()))
+                .andExpect(jsonPath("$.data.names").value("Ana Maria"));
+            }
+
     @Test
     void createShouldReturn422WhenBusinessRuleFails() throws Exception {
         UserRequest request = new UserRequest("Ana Maria", "CC12345", "ana@test.com", "Password123", "INVALID", "OWNER");

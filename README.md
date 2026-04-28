@@ -134,12 +134,18 @@ Ejemplo de error de validacion:
 
 ## Endpoints principales
 
+Nota sobre busquedas por ID:
+
+- El proyecto soporta ambas formas para busquedas especificas: `/{id}` y `?id={uuid}`.
+- Se mantiene compatibilidad con la forma por ruta para evitar romper integraciones existentes.
+
 ### Users
 
 - `POST /api/v1/users`
 - `PUT /api/v1/users/{id}`
 - `DELETE /api/v1/users/{id}`
 - `GET /api/v1/users/{id}`
+- `GET /api/v1/users?id={uuid}`
 - `GET /api/v1/users?names=ana`
 
 Payload de ejemplo:
@@ -161,6 +167,7 @@ Payload de ejemplo:
 - `PUT /api/v1/facilities/{id}`
 - `DELETE /api/v1/facilities/{id}`
 - `GET /api/v1/facilities/{id}`
+- `GET /api/v1/facilities?id={uuid}`
 - `GET /api/v1/facilities?name=salon`
 
 Payload de ejemplo:
@@ -180,6 +187,7 @@ Payload de ejemplo:
 - `PUT /api/v1/reservations/{id}`
 - `DELETE /api/v1/reservations/{id}`
 - `GET /api/v1/reservations/{id}`
+- `GET /api/v1/reservations?id={uuid}`
 - `GET /api/v1/reservations?date=2026-05-10`
 
 Payload de ejemplo:

@@ -70,6 +70,22 @@ class ReservationControllerTest {
     }
 
     @Test
+    void findByIdShouldAcceptQueryParam() throws Exception {
+        UUID id = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        UUID facilityId = UUID.randomUUID();
+        Reservation reservation = new Reservation(id, userId, facilityId, LocalDate.now().plusDays(1), LocalTime.NOON, LocalTime.NOON.plusHours(1));
+        when(useCase.findById(id)).thenReturn(reservation);
+
+        mockMvc.perform(get("/api/v1/reservations").param("id", id.toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value(200))
+                .andExpect(jsonPath("$.data.id").value(id.toString()))
+                .andExpect(jsonPath("$.data.userId").value(userId.toString()))
+                .andExpect(jsonPath("$.data.facilityId").value(facilityId.toString()));
+    }
+
+    @Test
     void createShouldReturn422WhenReservationConflicts() throws Exception {
         UUID userId = UUID.randomUUID();
         UUID facilityId = UUID.randomUUID();

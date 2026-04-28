@@ -59,9 +59,14 @@ public class ReservationController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<ReservationResponse>>> findAll(
+    public ResponseEntity<ApiResponse<?>> findAll(
+            @RequestParam(required = false) UUID id,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
     ) {
+        if (id != null) {
+            return ResponseEntity.ok(ApiResponse.success(toResponse(useCase.findById(id))));
+        }
+
         List<Reservation> data = (date == null) ? useCase.findAll() : useCase.findByDate(date);
         return ResponseEntity.ok(ApiResponse.success(data.stream().map(this::toResponse).toList()));
     }

@@ -54,7 +54,14 @@ public class UserController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<UserResponse>>> findAll(@RequestParam(required = false) String names) {
+    public ResponseEntity<ApiResponse<?>> findAll(
+            @RequestParam(required = false) UUID id,
+            @RequestParam(required = false) String names
+    ) {
+        if (id != null) {
+            return ResponseEntity.ok(ApiResponse.success(toResponse(useCase.findById(id))));
+        }
+
         List<User> data = (names == null || names.isBlank()) ? useCase.findAll() : useCase.findByNames(names);
         return ResponseEntity.ok(ApiResponse.success(data.stream().map(this::toResponse).toList()));
     }
