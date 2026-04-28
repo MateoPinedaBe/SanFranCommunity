@@ -17,10 +17,14 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -101,5 +105,36 @@ class ReservationControllerTest {
                 .andExpect(jsonPath("$.status").value(422))
                 .andExpect(jsonPath("$.data.error").value("Business Rule Violation"))
                 .andExpect(jsonPath("$.data.message").value("The facility is already reserved for the selected time range."));
+    }
+
+    @Test
+    void updateShouldAcceptIdQueryParam() throws Exception {
+        UUID id = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        UUID facilityId = UUID.randomUUID();
+        ReservationRequest request = new ReservationRequest(userId, facilityId, LocalDate.now().plusDays(1), LocalTime.NOON, LocalTime.NOON.plusHours(1));
+        Reservation updated = new Reservation(id, userId, facilityId, request.date(), request.startTime(), request.endTime());
+
+        when(useCase.update(eq(id), any(Reservation.class))).thenReturn(updated);
+
+        mockMvc.perform(put("/api/v1/reservations")
+                        .param("id", id.toString())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value(200))
+                .andExpect(jsonPath("$.data.id").value(id.toString()));
+    }
+
+    @Test
+    void deleteShouldAcceptIdQueryParam() throws Exception {
+        UUID id = UUID.randomUUID();
+
+        mockMvc.perform(delete("/api/v1/reservations").param("id", id.toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value(200))
+                .andExpect(jsonPath("$.data").value("Reservation deleted successfully."));
+
+        verify(useCase).delete(id);
     }
 }

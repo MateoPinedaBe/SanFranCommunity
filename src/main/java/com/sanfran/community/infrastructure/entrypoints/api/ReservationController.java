@@ -1,6 +1,7 @@
 package com.sanfran.community.infrastructure.entrypoints.api;
 
 import com.sanfran.community.domain.model.entity.Reservation;
+import com.sanfran.community.domain.model.exception.ValidationException;
 import com.sanfran.community.domain.usecase.ReservationUseCase;
 import com.sanfran.community.infrastructure.entrypoints.api.dto.ReservationRequest;
 import com.sanfran.community.infrastructure.entrypoints.api.dto.ReservationResponse;
@@ -47,9 +48,26 @@ public class ReservationController {
         return ResponseEntity.ok(ApiResponse.success(toResponse(updated)));
     }
 
+    @PutMapping
+    public ResponseEntity<ApiResponse<ReservationResponse>> updateByQuery(
+            @RequestParam(required = false) UUID id,
+            @Valid @RequestBody ReservationRequest request
+    ) {
+        UUID resolvedId = resolveReservationId(id, "update");
+        Reservation updated = useCase.update(resolvedId, toDomain(request));
+        return ResponseEntity.ok(ApiResponse.success(toResponse(updated)));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<String>> delete(@PathVariable UUID id) {
         useCase.delete(id);
+        return ResponseEntity.ok(ApiResponse.success("Reservation deleted successfully."));
+    }
+
+    @DeleteMapping
+    public ResponseEntity<ApiResponse<String>> deleteByQuery(@RequestParam(required = false) UUID id) {
+        UUID resolvedId = resolveReservationId(id, "delete");
+        useCase.delete(resolvedId);
         return ResponseEntity.ok(ApiResponse.success("Reservation deleted successfully."));
     }
 
@@ -91,5 +109,12 @@ public class ReservationController {
                 reservation.startTime(),
                 reservation.endTime()
         );
+    }
+
+    private UUID resolveReservationId(UUID id, String operation) {
+        if (id == null) {
+            throw new ValidationException("id", "Provide id query parameter to " + operation + " a reservation.");
+        }
+        return id;
     }
 }

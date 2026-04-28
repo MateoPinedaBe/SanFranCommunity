@@ -188,7 +188,11 @@ Payload de ejemplo para modificar:
 
 - `POST /api/v1/facilities`
 - `PUT /api/v1/facilities/{id}`
+- `PUT /api/v1/facilities?id={uuid}`
+- `PUT /api/v1/facilities?name=nombreExacto`
 - `DELETE /api/v1/facilities/{id}`
+- `DELETE /api/v1/facilities?id={uuid}`
+- `DELETE /api/v1/facilities?name=nombreExacto`
 - `GET /api/v1/facilities/{id}`
 - `GET /api/v1/facilities?id={uuid}`
 - `GET /api/v1/facilities?name=salon`
@@ -208,7 +212,9 @@ Payload de ejemplo:
 
 - `POST /api/v1/reservations`
 - `PUT /api/v1/reservations/{id}`
+- `PUT /api/v1/reservations?id={uuid}`
 - `DELETE /api/v1/reservations/{id}`
+- `DELETE /api/v1/reservations?id={uuid}`
 - `GET /api/v1/reservations/{id}`
 - `GET /api/v1/reservations?id={uuid}`
 - `GET /api/v1/reservations?date=2026-05-10`
@@ -233,6 +239,16 @@ Payload de ejemplo:
 - La fecha de reserva debe ser futura.
 - La hora de fin debe ser mayor que la hora de inicio.
 - No se permiten reservas traslapadas para la misma instalacion.
+
+## Semantica HTTP
+
+- `200 OK`: operaciones de lectura, actualizacion y eliminacion exitosas.
+- `201 Created`: creacion exitosa.
+- `400 Bad Request`: validaciones de entrada.
+- `404 Not Found`: recurso no encontrado.
+- `405 Method Not Allowed`: metodo HTTP no soportado para el endpoint.
+- `409 Conflict`: violacion de integridad de datos (por ejemplo, intentar borrar una instalacion con reservas asociadas).
+- `422 Unprocessable Entity`: regla de negocio incumplida.
 
 ## Documentacion interactiva
 

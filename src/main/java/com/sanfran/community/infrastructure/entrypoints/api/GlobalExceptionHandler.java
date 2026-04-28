@@ -3,9 +3,11 @@ package com.sanfran.community.infrastructure.entrypoints.api;
 import com.sanfran.community.domain.model.exception.BusinessRuleException;
 import com.sanfran.community.domain.model.exception.NotFoundException;
 import com.sanfran.community.domain.model.exception.ValidationException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -61,6 +63,40 @@ public class GlobalExceptionHandler {
                         "Validation Error",
                         field,
                         message
+                )));
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ApiResponse<ErrorResponse>> handleMethodNotSupported(
+            HttpRequestMethodNotSupportedException ex
+    ) {
+        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
+                .body(ApiResponse.error(405, new ErrorResponse(
+                        "Method Not Allowed",
+                        null,
+                        ex.getMessage()
+                )));
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiResponse<ErrorResponse>> handleDataIntegrityViolation(
+            DataIntegrityViolationException ex
+    ) {
+        String message = ex.getMostSpecificCause() != null
+                ? ex.getMostSpecificCause().getMessage()
+                : ex.getMessage();
+
+        if (message != null && message.contains("FK_RESERVATIONS_FACILITY")) {
+            message = "Cannot delete facility because it has associated reservations.";
+        } else if (message != null && message.contains("FK_RESERVATIONS_USER")) {
+            message = "Cannot delete user because it has associated reservations.";
+        }
+
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ApiResponse.error(409, new ErrorResponse(
+                        "Data Integrity Violation",
+                        null,
+                        message != null ? message : "Operation violates data integrity constraints."
                 )));
     }
 

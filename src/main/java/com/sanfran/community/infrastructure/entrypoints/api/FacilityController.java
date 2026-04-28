@@ -1,6 +1,9 @@
 package com.sanfran.community.infrastructure.entrypoints.api;
 
 import com.sanfran.community.domain.model.entity.Facility;
+import com.sanfran.community.domain.model.exception.BusinessRuleException;
+import com.sanfran.community.domain.model.exception.NotFoundException;
+import com.sanfran.community.domain.model.exception.ValidationException;
 import com.sanfran.community.domain.usecase.FacilityUseCase;
 import com.sanfran.community.infrastructure.entrypoints.api.dto.FacilityRequest;
 import com.sanfran.community.infrastructure.entrypoints.api.dto.FacilityResponse;
@@ -42,9 +45,30 @@ public class FacilityController {
         return ResponseEntity.ok(ApiResponse.success(toResponse(updated)));
     }
 
+    @PutMapping
+    public ResponseEntity<ApiResponse<FacilityResponse>> updateByQuery(
+            @RequestParam(required = false) UUID id,
+            @RequestParam(required = false) String name,
+            @Valid @RequestBody FacilityRequest request
+    ) {
+        UUID resolvedId = resolveFacilityIdByQuery(id, name, "update");
+        Facility updated = useCase.update(resolvedId, toDomain(request));
+        return ResponseEntity.ok(ApiResponse.success(toResponse(updated)));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<String>> delete(@PathVariable UUID id) {
         useCase.delete(id);
+        return ResponseEntity.ok(ApiResponse.success("Facility deleted successfully."));
+    }
+
+    @DeleteMapping
+    public ResponseEntity<ApiResponse<String>> deleteByQuery(
+            @RequestParam(required = false) UUID id,
+            @RequestParam(required = false) String name
+    ) {
+        UUID resolvedId = resolveFacilityIdByQuery(id, name, "delete");
+        useCase.delete(resolvedId);
         return ResponseEntity.ok(ApiResponse.success("Facility deleted successfully."));
     }
 
@@ -84,5 +108,30 @@ public class FacilityController {
                 facility.imageUrl(),
                 facility.capacity()
         );
+    }
+
+    private UUID resolveFacilityIdByQuery(UUID id, String name, String operation) {
+        if (id != null) {
+            return id;
+        }
+
+        if (name == null || name.isBlank()) {
+            throw new ValidationException("id", "Provide either id or name query parameter to " + operation + " a facility.");
+        }
+
+        String normalizedName = name.trim();
+        List<Facility> matches = useCase.findByName(normalizedName).stream()
+                .filter(facility -> facility.name() != null && facility.name().equalsIgnoreCase(normalizedName))
+                .toList();
+
+        if (matches.isEmpty()) {
+            throw new NotFoundException("The Facility was not found in the database.");
+        }
+
+        if (matches.size() > 1) {
+            throw new BusinessRuleException("Multiple facilities match the provided name. Use id to " + operation + " a specific facility.");
+        }
+
+        return matches.getFirst().id();
     }
 }

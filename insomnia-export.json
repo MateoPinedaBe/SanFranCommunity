@@ -201,9 +201,39 @@
       "_id": "req_fac_update",
       "_type": "request",
       "parentId": "fld_facilities",
-      "name": "Update Facility",
+      "name": "Update Facility by ID (path)",
       "method": "PUT",
       "url": "{{ _.base_url }}/api/v1/facilities/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Salon Social Premium\",\n  \"description\": \"Salon remodelado para eventos\",\n  \"imageUrl\": \"https://example.com/salon-premium.jpg\",\n  \"capacity\": 150\n}"
+      },
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" }
+      ]
+    },
+    {
+      "_id": "req_fac_update_id_query",
+      "_type": "request",
+      "parentId": "fld_facilities",
+      "name": "Update Facility by ID (query)",
+      "method": "PUT",
+      "url": "{{ _.base_url }}/api/v1/facilities?id=aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Salon Social Premium\",\n  \"description\": \"Salon remodelado para eventos\",\n  \"imageUrl\": \"https://example.com/salon-premium.jpg\",\n  \"capacity\": 150\n}"
+      },
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" }
+      ]
+    },
+    {
+      "_id": "req_fac_update_name_query",
+      "_type": "request",
+      "parentId": "fld_facilities",
+      "name": "Update Facility by Name (query)",
+      "method": "PUT",
+      "url": "{{ _.base_url }}/api/v1/facilities?name=Salon Social",
       "body": {
         "mimeType": "application/json",
         "text": "{\n  \"name\": \"Salon Social Premium\",\n  \"description\": \"Salon remodelado para eventos\",\n  \"imageUrl\": \"https://example.com/salon-premium.jpg\",\n  \"capacity\": 150\n}"
@@ -216,7 +246,25 @@
       "_id": "req_fac_delete",
       "_type": "request",
       "parentId": "fld_facilities",
-      "name": "Delete Facility",
+      "name": "Delete Facility by ID (query)",
+      "method": "DELETE",
+      "url": "{{ _.base_url }}/api/v1/facilities?id=aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+      "headers": []
+    },
+    {
+      "_id": "req_fac_delete_name_query",
+      "_type": "request",
+      "parentId": "fld_facilities",
+      "name": "Delete Facility by Name (query)",
+      "method": "DELETE",
+      "url": "{{ _.base_url }}/api/v1/facilities?name=Salon Social",
+      "headers": []
+    },
+    {
+      "_id": "req_fac_delete_path",
+      "_type": "request",
+      "parentId": "fld_facilities",
+      "name": "Delete Facility by ID (path)",
       "method": "DELETE",
       "url": "{{ _.base_url }}/api/v1/facilities/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
       "headers": []
@@ -283,9 +331,24 @@
       "_id": "req_res_update",
       "_type": "request",
       "parentId": "fld_res",
-      "name": "Update Reservation",
+      "name": "Update Reservation by ID (path)",
       "method": "PUT",
       "url": "{{ _.base_url }}/api/v1/reservations/00000000-0000-0000-0000-000000000000",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"userId\": \"11111111-1111-1111-1111-111111111111\",\n  \"facilityId\": \"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa\",\n  \"date\": \"2026-05-10\",\n  \"startTime\": \"12:00:00\",\n  \"endTime\": \"14:00:00\"\n}"
+      },
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" }
+      ]
+    },
+    {
+      "_id": "req_res_update_id_query",
+      "_type": "request",
+      "parentId": "fld_res",
+      "name": "Update Reservation by ID (query)",
+      "method": "PUT",
+      "url": "{{ _.base_url }}/api/v1/reservations?id=00000000-0000-0000-0000-000000000000",
       "body": {
         "mimeType": "application/json",
         "text": "{\n  \"userId\": \"11111111-1111-1111-1111-111111111111\",\n  \"facilityId\": \"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa\",\n  \"date\": \"2026-05-10\",\n  \"startTime\": \"12:00:00\",\n  \"endTime\": \"14:00:00\"\n}"
@@ -298,7 +361,16 @@
       "_id": "req_res_delete",
       "_type": "request",
       "parentId": "fld_res",
-      "name": "Delete Reservation",
+      "name": "Delete Reservation by ID (query)",
+      "method": "DELETE",
+      "url": "{{ _.base_url }}/api/v1/reservations?id=00000000-0000-0000-0000-000000000000",
+      "headers": []
+    },
+    {
+      "_id": "req_res_delete_path",
+      "_type": "request",
+      "parentId": "fld_res",
+      "name": "Delete Reservation by ID (path)",
       "method": "DELETE",
       "url": "{{ _.base_url }}/api/v1/reservations/00000000-0000-0000-0000-000000000000",
       "headers": []
