@@ -51,7 +51,7 @@ public class UserController {
             @RequestParam(required = false) String names,
             @Valid @RequestBody UserRequest request
     ) {
-        UUID resolvedId = resolveUpdateId(id, names);
+        UUID resolvedId = resolveUserIdByQuery(id, names, "update");
         User updated = useCase.update(resolvedId, toDomain(request));
         return ResponseEntity.ok(ApiResponse.success(toResponse(updated)));
     }
@@ -59,6 +59,16 @@ public class UserController {
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<String>> delete(@PathVariable UUID id) {
         useCase.delete(id);
+        return ResponseEntity.ok(ApiResponse.success("User deleted successfully."));
+    }
+
+    @DeleteMapping
+    public ResponseEntity<ApiResponse<String>> deleteByQuery(
+            @RequestParam(required = false) UUID id,
+            @RequestParam(required = false) String names
+    ) {
+        UUID resolvedId = resolveUserIdByQuery(id, names, "delete");
+        useCase.delete(resolvedId);
         return ResponseEntity.ok(ApiResponse.success("User deleted successfully."));
     }
 
@@ -103,13 +113,13 @@ public class UserController {
         );
     }
 
-    private UUID resolveUpdateId(UUID id, String names) {
+    private UUID resolveUserIdByQuery(UUID id, String names, String operation) {
         if (id != null) {
             return id;
         }
 
         if (names == null || names.isBlank()) {
-            throw new ValidationException("id", "Provide either id or names query parameter.");
+            throw new ValidationException("id", "Provide either id or names query parameter to " + operation + " a user.");
         }
 
         String normalizedName = names.trim();
@@ -122,7 +132,7 @@ public class UserController {
         }
 
         if (matches.size() > 1) {
-            throw new BusinessRuleException("Multiple users match the provided name. Use id to update a specific user.");
+            throw new BusinessRuleException("Multiple users match the provided name. Use id to " + operation + " a specific user.");
         }
 
         return matches.getFirst().id();

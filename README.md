@@ -146,24 +146,39 @@ Nota sobre busquedas por ID:
 - `PUT /api/v1/users?id={uuid}`
 - `PUT /api/v1/users?names=nombreExacto`
 - `DELETE /api/v1/users/{id}`
+- `DELETE /api/v1/users?id={uuid}`
+- `DELETE /api/v1/users?names=nombreExacto`
 - `GET /api/v1/users/{id}`
 - `GET /api/v1/users?id={uuid}`
 - `GET /api/v1/users?names=ana`
 
-Notas para update por query param en users:
+Notas para update/delete por query param en users:
 
 - Si envias `id`, el update se aplica sobre ese registro.
 - Si envias `names`, debe coincidir exactamente con un solo usuario.
 - Si hay multiples coincidencias por nombre, la API responde con error y debes usar `id`.
 
-Payload de ejemplo:
+Payload de ejemplo para crear:
 
 ```json
 {
-	"names": "Ana Maria Gomez",
-	"idDocument": "CC12345",
-	"email": "ana@test.com",
-	"password": "Password123",
+	"names": "Mateo Andrés Pineda Beltrán",
+	"idDocument": "CC1066869266",
+	"email": "mateo.pineda.be@gmail.com",
+	"password": "ContraseñaSeguraObvi",
+	"role": "ADMIN",
+	"subRole": "OWNER"
+}
+```
+
+Payload de ejemplo para modificar:
+
+```json
+{
+	"names": "Mateo Andrés Pineda Beltrán Actualizado",
+	"idDocument": "CC1066869266",
+	"email": "mateo.pineda.actualizado@gmail.com",
+	"password": "ContraseñaSeguraObvi2",
 	"role": "ADMIN",
 	"subRole": "OWNER"
 }

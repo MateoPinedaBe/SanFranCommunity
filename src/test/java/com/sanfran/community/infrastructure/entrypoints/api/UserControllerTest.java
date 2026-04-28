@@ -17,7 +17,9 @@ import java.util.UUID;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -68,19 +70,19 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.data[0].names").value("Ana Maria"));
     }
 
-            @Test
-            void findByIdShouldAcceptQueryParam() throws Exception {
-            UUID id = UUID.randomUUID();
-            when(useCase.findById(id)).thenReturn(
+    @Test
+    void findByIdShouldAcceptQueryParam() throws Exception {
+        UUID id = UUID.randomUUID();
+        when(useCase.findById(id)).thenReturn(
                 new User(id, "Ana Maria", "CC12345", "ana@test.com", "Password123", "ADMIN", "OWNER")
-            );
+        );
 
-            mockMvc.perform(get("/api/v1/users").param("id", id.toString()))
+        mockMvc.perform(get("/api/v1/users").param("id", id.toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value(200))
                 .andExpect(jsonPath("$.data.id").value(id.toString()))
                 .andExpect(jsonPath("$.data.names").value("Ana Maria"));
-            }
+    }
 
     @Test
     void createShouldReturn422WhenBusinessRuleFails() throws Exception {
@@ -96,39 +98,66 @@ class UserControllerTest {
             .andExpect(jsonPath("$.data.message").value("Role must be one of: ADMIN, RESIDENT, STAFF."));
     }
 
-            @Test
-            void updateShouldAcceptIdQueryParam() throws Exception {
-            UUID id = UUID.randomUUID();
-            UserRequest request = new UserRequest("Ana Maria", "CC12345", "ana@test.com", "Password123", "ADMIN", "OWNER");
+    @Test
+    void updateShouldAcceptIdQueryParam() throws Exception {
+        UUID id = UUID.randomUUID();
+        UserRequest request = new UserRequest("Ana Maria", "CC12345", "ana@test.com", "Password123", "ADMIN", "OWNER");
 
-            when(useCase.update(eq(id), any(User.class)))
+        when(useCase.update(eq(id), any(User.class)))
                 .thenReturn(new User(id, "Ana Maria", "CC12345", "ana@test.com", "encoded", "ADMIN", "OWNER"));
 
-            mockMvc.perform(put("/api/v1/users")
-                    .param("id", id.toString())
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(request)))
+        mockMvc.perform(put("/api/v1/users")
+                        .param("id", id.toString())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value(200))
                 .andExpect(jsonPath("$.data.id").value(id.toString()));
-            }
+    }
 
-            @Test
-            void updateShouldAcceptNamesQueryParam() throws Exception {
-            UUID id = UUID.randomUUID();
-            UserRequest request = new UserRequest("Ana Maria", "CC12345", "ana@test.com", "Password123", "ADMIN", "OWNER");
-            User existing = new User(id, "Ana Maria", "CC12345", "ana@test.com", "encoded", "ADMIN", "OWNER");
+    @Test
+    void updateShouldAcceptNamesQueryParam() throws Exception {
+        UUID id = UUID.randomUUID();
+        UserRequest request = new UserRequest("Ana Maria", "CC12345", "ana@test.com", "Password123", "ADMIN", "OWNER");
+        User existing = new User(id, "Ana Maria", "CC12345", "ana@test.com", "encoded", "ADMIN", "OWNER");
 
-            when(useCase.findByNames("Ana Maria")).thenReturn(List.of(existing));
-            when(useCase.update(eq(id), any(User.class))).thenReturn(existing);
+        when(useCase.findByNames("Ana Maria")).thenReturn(List.of(existing));
+        when(useCase.update(eq(id), any(User.class))).thenReturn(existing);
 
-            mockMvc.perform(put("/api/v1/users")
-                    .param("names", "Ana Maria")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(request)))
+        mockMvc.perform(put("/api/v1/users")
+                        .param("names", "Ana Maria")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value(200))
                 .andExpect(jsonPath("$.data.id").value(id.toString()))
                 .andExpect(jsonPath("$.data.names").value("Ana Maria"));
-            }
+    }
+
+    @Test
+    void deleteShouldAcceptIdQueryParam() throws Exception {
+        UUID id = UUID.randomUUID();
+
+        mockMvc.perform(delete("/api/v1/users").param("id", id.toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value(200))
+                .andExpect(jsonPath("$.data").value("User deleted successfully."));
+
+        verify(useCase).delete(id);
+    }
+
+    @Test
+    void deleteShouldAcceptNamesQueryParam() throws Exception {
+        UUID id = UUID.randomUUID();
+        User existing = new User(id, "Ana Maria", "CC12345", "ana@test.com", "encoded", "ADMIN", "OWNER");
+
+        when(useCase.findByNames("Ana Maria")).thenReturn(List.of(existing));
+
+        mockMvc.perform(delete("/api/v1/users").param("names", "Ana Maria"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value(200))
+                .andExpect(jsonPath("$.data").value("User deleted successfully."));
+
+        verify(useCase).delete(id);
+    }
 }
