@@ -1,6 +1,9 @@
 package com.sanfran.community.infrastructure.entrypoints.api;
 
 import com.sanfran.community.domain.model.entity.User;
+import com.sanfran.community.domain.model.exception.BusinessRuleException;
+import com.sanfran.community.domain.model.exception.NotFoundException;
+import com.sanfran.community.domain.model.exception.ValidationException;
 import com.sanfran.community.domain.usecase.UserUseCase;
 import com.sanfran.community.infrastructure.entrypoints.api.dto.UserRequest;
 import com.sanfran.community.infrastructure.entrypoints.api.dto.UserResponse;
@@ -39,6 +42,17 @@ public class UserController {
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<UserResponse>> update(@PathVariable UUID id, @Valid @RequestBody UserRequest request) {
         User updated = useCase.update(id, toDomain(request));
+        return ResponseEntity.ok(ApiResponse.success(toResponse(updated)));
+    }
+
+    @PutMapping
+    public ResponseEntity<ApiResponse<UserResponse>> updateByQuery(
+            @RequestParam(required = false) UUID id,
+            @RequestParam(required = false) String names,
+            @Valid @RequestBody UserRequest request
+    ) {
+        UUID resolvedId = resolveUpdateId(id, names);
+        User updated = useCase.update(resolvedId, toDomain(request));
         return ResponseEntity.ok(ApiResponse.success(toResponse(updated)));
     }
 
@@ -87,5 +101,30 @@ public class UserController {
                 user.role(),
                 user.subRole()
         );
+    }
+
+    private UUID resolveUpdateId(UUID id, String names) {
+        if (id != null) {
+            return id;
+        }
+
+        if (names == null || names.isBlank()) {
+            throw new ValidationException("id", "Provide either id or names query parameter.");
+        }
+
+        String normalizedName = names.trim();
+        List<User> matches = useCase.findByNames(normalizedName).stream()
+                .filter(user -> user.names() != null && user.names().equalsIgnoreCase(normalizedName))
+                .toList();
+
+        if (matches.isEmpty()) {
+            throw new NotFoundException("The User was not found in the database.");
+        }
+
+        if (matches.size() > 1) {
+            throw new BusinessRuleException("Multiple users match the provided name. Use id to update a specific user.");
+        }
+
+        return matches.getFirst().id();
     }
 }

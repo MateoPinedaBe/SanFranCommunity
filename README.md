@@ -143,10 +143,18 @@ Nota sobre busquedas por ID:
 
 - `POST /api/v1/users`
 - `PUT /api/v1/users/{id}`
+- `PUT /api/v1/users?id={uuid}`
+- `PUT /api/v1/users?names=nombreExacto`
 - `DELETE /api/v1/users/{id}`
 - `GET /api/v1/users/{id}`
 - `GET /api/v1/users?id={uuid}`
 - `GET /api/v1/users?names=ana`
+
+Notas para update por query param en users:
+
+- Si envias `id`, el update se aplica sobre ese registro.
+- Si envias `names`, debe coincidir exactamente con un solo usuario.
+- Si hay multiples coincidencias por nombre, la API responde con error y debes usar `id`.
 
 Payload de ejemplo:
 

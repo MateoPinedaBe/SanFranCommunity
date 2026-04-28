@@ -15,9 +15,11 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -93,4 +95,40 @@ class UserControllerTest {
             .andExpect(jsonPath("$.data.error").value("Business Rule Violation"))
             .andExpect(jsonPath("$.data.message").value("Role must be one of: ADMIN, RESIDENT, STAFF."));
     }
+
+            @Test
+            void updateShouldAcceptIdQueryParam() throws Exception {
+            UUID id = UUID.randomUUID();
+            UserRequest request = new UserRequest("Ana Maria", "CC12345", "ana@test.com", "Password123", "ADMIN", "OWNER");
+
+            when(useCase.update(eq(id), any(User.class)))
+                .thenReturn(new User(id, "Ana Maria", "CC12345", "ana@test.com", "encoded", "ADMIN", "OWNER"));
+
+            mockMvc.perform(put("/api/v1/users")
+                    .param("id", id.toString())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value(200))
+                .andExpect(jsonPath("$.data.id").value(id.toString()));
+            }
+
+            @Test
+            void updateShouldAcceptNamesQueryParam() throws Exception {
+            UUID id = UUID.randomUUID();
+            UserRequest request = new UserRequest("Ana Maria", "CC12345", "ana@test.com", "Password123", "ADMIN", "OWNER");
+            User existing = new User(id, "Ana Maria", "CC12345", "ana@test.com", "encoded", "ADMIN", "OWNER");
+
+            when(useCase.findByNames("Ana Maria")).thenReturn(List.of(existing));
+            when(useCase.update(eq(id), any(User.class))).thenReturn(existing);
+
+            mockMvc.perform(put("/api/v1/users")
+                    .param("names", "Ana Maria")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value(200))
+                .andExpect(jsonPath("$.data.id").value(id.toString()))
+                .andExpect(jsonPath("$.data.names").value("Ana Maria"));
+            }
 }
