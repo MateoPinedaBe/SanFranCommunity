@@ -32,9 +32,17 @@ class EntityTests {
     @Test
     void reservationRecordShouldPreserveValues() {
         UUID id = UUID.randomUUID();
-        Reservation reservation = new Reservation(id, LocalDate.now().plusDays(1), LocalTime.NOON, LocalTime.NOON.plusHours(1));
+        Reservation reservation = new Reservation(
+                id,
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                LocalDate.now().plusDays(1),
+                LocalTime.NOON,
+                LocalTime.NOON.plusHours(1)
+        );
 
         assertThat(reservation.id()).isEqualTo(id);
+        assertThat(reservation.userId()).isNotNull();
         assertThat(reservation.endTime()).isAfter(reservation.startTime());
     }
 }

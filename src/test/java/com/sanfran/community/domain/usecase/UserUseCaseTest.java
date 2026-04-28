@@ -8,6 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -23,28 +24,32 @@ class UserUseCaseTest {
     @Mock
     private UserRepository repository;
 
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
     private UserUseCase useCase;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        useCase = new UserUseCase(repository);
+        useCase = new UserUseCase(repository, passwordEncoder);
     }
 
     @Test
     void createShouldNormalizeAndPersistUser() {
         User input = new User(null, " Ana Maria ", " CC12345 ", " ANA@TEST.COM ", "Password123", "resident", "owner");
-        User saved = new User(UUID.randomUUID(), "Ana Maria", "CC12345", "ana@test.com", "Password123", "RESIDENT", "OWNER");
+        User saved = new User(UUID.randomUUID(), "Ana Maria", "CC12345", "ana@test.com", "encoded-password", "RESIDENT", "OWNER");
 
         when(repository.findByEmailIgnoreCase("ana@test.com")).thenReturn(Optional.empty());
         when(repository.findByIdDocumentIgnoreCase("CC12345")).thenReturn(Optional.empty());
+        when(passwordEncoder.encode("Password123")).thenReturn("encoded-password");
         when(repository.save(any(User.class))).thenReturn(saved);
 
         User result = useCase.create(input);
 
         assertThat(result.email()).isEqualTo("ana@test.com");
         assertThat(result.role()).isEqualTo("RESIDENT");
-        verify(repository).save(new User(null, "Ana Maria", "CC12345", "ana@test.com", "Password123", "RESIDENT", "OWNER"));
+        verify(repository).save(new User(null, "Ana Maria", "CC12345", "ana@test.com", "encoded-password", "RESIDENT", "OWNER"));
     }
 
     @Test
@@ -52,6 +57,7 @@ class UserUseCaseTest {
         User input = new User(null, "Ana Maria", "CC12345", "ana@test.com", "Password123", "ADMIN", "OWNER");
         User existing = new User(UUID.randomUUID(), "Ana Maria", "CC12345", "ana@test.com", "Password123", "ADMIN", "OWNER");
 
+        when(passwordEncoder.encode("Password123")).thenReturn("encoded-password");
         when(repository.findByEmailIgnoreCase("ana@test.com")).thenReturn(Optional.of(existing));
 
         assertThatThrownBy(() -> useCase.create(input))
@@ -64,6 +70,7 @@ class UserUseCaseTest {
         UUID id = UUID.randomUUID();
         User input = new User(null, "Ana Maria", "CC12345", "ana@test.com", "Password123", "ADMIN", "OWNER");
 
+        when(passwordEncoder.encode("Password123")).thenReturn("encoded-password");
         when(repository.findByEmailIgnoreCase("ana@test.com")).thenReturn(Optional.empty());
         when(repository.findByIdDocumentIgnoreCase("CC12345")).thenReturn(Optional.empty());
         when(repository.findById(id)).thenReturn(Optional.empty());

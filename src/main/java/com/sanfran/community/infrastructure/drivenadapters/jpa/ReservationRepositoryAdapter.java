@@ -7,6 +7,7 @@ import com.sanfran.community.infrastructure.drivenadapters.jpa.repository.Reserv
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -52,9 +53,22 @@ public class ReservationRepositoryAdapter implements ReservationRepository {
         return repository.findByDate(date).stream().map(this::toDomain).toList();
     }
 
+    @Override
+    public boolean existsConflict(
+            UUID facilityId,
+            LocalDate date,
+            LocalTime startTime,
+            LocalTime endTime,
+            UUID excludedReservationId
+    ) {
+        return repository.existsConflict(facilityId, date, startTime, endTime, excludedReservationId);
+    }
+
     private ReservationJpaEntity toEntity(Reservation reservation) {
         ReservationJpaEntity entity = new ReservationJpaEntity();
         entity.setId(reservation.id());
+        entity.setUserId(reservation.userId());
+        entity.setFacilityId(reservation.facilityId());
         entity.setDate(reservation.date());
         entity.setStartTime(reservation.startTime());
         entity.setEndTime(reservation.endTime());
@@ -64,6 +78,8 @@ public class ReservationRepositoryAdapter implements ReservationRepository {
     private Reservation toDomain(ReservationJpaEntity entity) {
         return new Reservation(
                 entity.getId(),
+            entity.getUserId(),
+            entity.getFacilityId(),
                 entity.getDate(),
                 entity.getStartTime(),
                 entity.getEndTime()

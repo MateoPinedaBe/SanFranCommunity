@@ -111,6 +111,14 @@ public final class DomainValidators {
             throw new ValidationException("reservation", "Reservation data must not be null.");
         }
 
+        if (reservation.userId() == null) {
+            throw new ValidationException("userId", "User is required.");
+        }
+
+        if (reservation.facilityId() == null) {
+            throw new ValidationException("facilityId", "Facility is required.");
+        }
+
         if (reservation.date() == null) {
             throw new ValidationException("date", "Date is required.");
         }

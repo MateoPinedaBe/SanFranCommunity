@@ -18,7 +18,11 @@ CREATE TABLE IF NOT EXISTS facilities (
 
 CREATE TABLE IF NOT EXISTS reservations (
     id UUID DEFAULT RANDOM_UUID() PRIMARY KEY,
+    user_id UUID NOT NULL,
+    facility_id UUID NOT NULL,
     date DATE NOT NULL,
     start_time TIME NOT NULL,
-    end_time TIME NOT NULL
+    end_time TIME NOT NULL,
+    CONSTRAINT fk_reservations_user FOREIGN KEY (user_id) REFERENCES users(id),
+    CONSTRAINT fk_reservations_facility FOREIGN KEY (facility_id) REFERENCES facilities(id)
 );

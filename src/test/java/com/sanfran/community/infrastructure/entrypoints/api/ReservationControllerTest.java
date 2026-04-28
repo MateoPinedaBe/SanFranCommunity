@@ -40,8 +40,10 @@ class ReservationControllerTest {
 
     @Test
     void createShouldReturn201() throws Exception {
-        ReservationRequest request = new ReservationRequest(LocalDate.now().plusDays(1), LocalTime.NOON, LocalTime.NOON.plusHours(1));
-        Reservation reservation = new Reservation(UUID.randomUUID(), request.date(), request.startTime(), request.endTime());
+        UUID userId = UUID.randomUUID();
+        UUID facilityId = UUID.randomUUID();
+        ReservationRequest request = new ReservationRequest(userId, facilityId, LocalDate.now().plusDays(1), LocalTime.NOON, LocalTime.NOON.plusHours(1));
+        Reservation reservation = new Reservation(UUID.randomUUID(), userId, facilityId, request.date(), request.startTime(), request.endTime());
         when(useCase.create(any(Reservation.class))).thenReturn(reservation);
 
         mockMvc.perform(post("/api/v1/reservations")
@@ -54,7 +56,7 @@ class ReservationControllerTest {
     @Test
     void findAllShouldReturn200() throws Exception {
         when(useCase.findAll()).thenReturn(List.of(
-                new Reservation(UUID.randomUUID(), LocalDate.now().plusDays(1), LocalTime.NOON, LocalTime.NOON.plusHours(1))
+            new Reservation(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), LocalDate.now().plusDays(1), LocalTime.NOON, LocalTime.NOON.plusHours(1))
         ));
 
         mockMvc.perform(get("/api/v1/reservations"))

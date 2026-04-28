@@ -5,6 +5,7 @@ import com.sanfran.community.domain.model.exception.NotFoundException;
 import com.sanfran.community.domain.model.exception.ValidationException;
 import com.sanfran.community.domain.model.vo.DomainValidators;
 import com.sanfran.community.domain.usecase.port.UserRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Locale;
 import java.util.List;
@@ -14,9 +15,11 @@ import java.util.UUID;
 public class UserUseCase {
 
     private final UserRepository repository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserUseCase(UserRepository repository) {
+    public UserUseCase(UserRepository repository, PasswordEncoder passwordEncoder) {
         this.repository = repository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public User create(User user) {
@@ -101,7 +104,7 @@ public class UserUseCase {
             user.names() == null ? null : user.names().trim(),
             user.idDocument() == null ? null : user.idDocument().trim(),
             user.email() == null ? null : user.email().trim().toLowerCase(Locale.ROOT),
-                user.password(),
+                user.password() == null ? null : passwordEncoder.encode(user.password()),
                 DomainValidators.normalizeRole(user.role()),
                 DomainValidators.normalizeSubRole(user.subRole())
         );

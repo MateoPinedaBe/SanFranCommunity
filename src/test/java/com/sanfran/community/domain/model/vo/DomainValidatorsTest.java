@@ -35,7 +35,14 @@ class DomainValidatorsTest {
 
     @Test
     void validateReservationShouldRejectPastDate() {
-        Reservation reservation = new Reservation(null, LocalDate.now().minusDays(1), LocalTime.NOON, LocalTime.NOON.plusHours(1));
+        Reservation reservation = new Reservation(
+            null,
+            java.util.UUID.randomUUID(),
+            java.util.UUID.randomUUID(),
+            LocalDate.now().minusDays(1),
+            LocalTime.NOON,
+            LocalTime.NOON.plusHours(1)
+        );
 
         assertThatThrownBy(() -> DomainValidators.validateReservation(reservation))
                 .isInstanceOf(BusinessRuleException.class)

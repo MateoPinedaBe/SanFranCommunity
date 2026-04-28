@@ -68,6 +68,8 @@ public class ReservationController {
     private Reservation toDomain(ReservationRequest request) {
         return new Reservation(
                 null,
+                request.userId(),
+                request.facilityId(),
                 request.date(),
                 request.startTime(),
                 request.endTime()
