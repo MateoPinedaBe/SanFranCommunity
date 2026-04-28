@@ -3,6 +3,7 @@ package com.sanfran.community.infrastructure.entrypoints.api;
 import com.sanfran.community.domain.model.entity.Reservation;
 import com.sanfran.community.domain.usecase.ReservationUseCase;
 import com.sanfran.community.infrastructure.entrypoints.api.dto.ReservationRequest;
+import com.sanfran.community.infrastructure.entrypoints.api.dto.ReservationResponse;
 import jakarta.validation.Valid;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -32,18 +33,18 @@ public class ReservationController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<Reservation>> create(@Valid @RequestBody ReservationRequest request) {
+    public ResponseEntity<ApiResponse<ReservationResponse>> create(@Valid @RequestBody ReservationRequest request) {
         Reservation created = useCase.create(toDomain(request));
-        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(201, created));
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(201, toResponse(created)));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<Reservation>> update(
+    public ResponseEntity<ApiResponse<ReservationResponse>> update(
             @PathVariable UUID id,
             @Valid @RequestBody ReservationRequest request
     ) {
         Reservation updated = useCase.update(id, toDomain(request));
-        return ResponseEntity.ok(ApiResponse.success(updated));
+        return ResponseEntity.ok(ApiResponse.success(toResponse(updated)));
     }
 
     @DeleteMapping("/{id}")
@@ -53,16 +54,16 @@ public class ReservationController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<Reservation>> findById(@PathVariable UUID id) {
-        return ResponseEntity.ok(ApiResponse.success(useCase.findById(id)));
+    public ResponseEntity<ApiResponse<ReservationResponse>> findById(@PathVariable UUID id) {
+        return ResponseEntity.ok(ApiResponse.success(toResponse(useCase.findById(id))));
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<Reservation>>> findAll(
+    public ResponseEntity<ApiResponse<List<ReservationResponse>>> findAll(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
     ) {
         List<Reservation> data = (date == null) ? useCase.findAll() : useCase.findByDate(date);
-        return ResponseEntity.ok(ApiResponse.success(data));
+        return ResponseEntity.ok(ApiResponse.success(data.stream().map(this::toResponse).toList()));
     }
 
     private Reservation toDomain(ReservationRequest request) {
@@ -73,6 +74,17 @@ public class ReservationController {
                 request.date(),
                 request.startTime(),
                 request.endTime()
+        );
+    }
+
+    private ReservationResponse toResponse(Reservation reservation) {
+        return new ReservationResponse(
+                reservation.id(),
+                reservation.userId(),
+                reservation.facilityId(),
+                reservation.date(),
+                reservation.startTime(),
+                reservation.endTime()
         );
     }
 }

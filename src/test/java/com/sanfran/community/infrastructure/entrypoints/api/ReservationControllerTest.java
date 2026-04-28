@@ -2,6 +2,7 @@ package com.sanfran.community.infrastructure.entrypoints.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sanfran.community.domain.model.entity.Reservation;
+import com.sanfran.community.domain.model.exception.BusinessRuleException;
 import com.sanfran.community.domain.usecase.ReservationUseCase;
 import com.sanfran.community.infrastructure.entrypoints.api.dto.ReservationRequest;
 import org.junit.jupiter.api.BeforeEach;
@@ -50,7 +51,9 @@ class ReservationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.status").value(201));
+            .andExpect(jsonPath("$.status").value(201))
+            .andExpect(jsonPath("$.data.userId").value(userId.toString()))
+            .andExpect(jsonPath("$.data.facilityId").value(facilityId.toString()));
     }
 
     @Test
@@ -62,6 +65,25 @@ class ReservationControllerTest {
         mockMvc.perform(get("/api/v1/reservations"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value(200))
+            .andExpect(jsonPath("$.data[0].userId").exists())
                 .andExpect(jsonPath("$.data[0].startTime").value("12:00:00"));
+    }
+
+    @Test
+    void createShouldReturn422WhenReservationConflicts() throws Exception {
+        UUID userId = UUID.randomUUID();
+        UUID facilityId = UUID.randomUUID();
+        ReservationRequest request = new ReservationRequest(userId, facilityId, LocalDate.now().plusDays(1), LocalTime.NOON, LocalTime.NOON.plusHours(1));
+
+        when(useCase.create(any(Reservation.class)))
+                .thenThrow(new BusinessRuleException("The facility is already reserved for the selected time range."));
+
+        mockMvc.perform(post("/api/v1/reservations")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.status").value(422))
+                .andExpect(jsonPath("$.data.error").value("Business Rule Violation"))
+                .andExpect(jsonPath("$.data.message").value("The facility is already reserved for the selected time range."));
     }
 }

@@ -3,6 +3,7 @@ package com.sanfran.community.infrastructure.entrypoints.api;
 import com.sanfran.community.domain.model.entity.Facility;
 import com.sanfran.community.domain.usecase.FacilityUseCase;
 import com.sanfran.community.infrastructure.entrypoints.api.dto.FacilityRequest;
+import com.sanfran.community.infrastructure.entrypoints.api.dto.FacilityResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,15 +31,15 @@ public class FacilityController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<Facility>> create(@Valid @RequestBody FacilityRequest request) {
+    public ResponseEntity<ApiResponse<FacilityResponse>> create(@Valid @RequestBody FacilityRequest request) {
         Facility created = useCase.create(toDomain(request));
-        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(201, created));
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(201, toResponse(created)));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<Facility>> update(@PathVariable UUID id, @Valid @RequestBody FacilityRequest request) {
+    public ResponseEntity<ApiResponse<FacilityResponse>> update(@PathVariable UUID id, @Valid @RequestBody FacilityRequest request) {
         Facility updated = useCase.update(id, toDomain(request));
-        return ResponseEntity.ok(ApiResponse.success(updated));
+        return ResponseEntity.ok(ApiResponse.success(toResponse(updated)));
     }
 
     @DeleteMapping("/{id}")
@@ -48,14 +49,14 @@ public class FacilityController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<Facility>> findById(@PathVariable UUID id) {
-        return ResponseEntity.ok(ApiResponse.success(useCase.findById(id)));
+    public ResponseEntity<ApiResponse<FacilityResponse>> findById(@PathVariable UUID id) {
+        return ResponseEntity.ok(ApiResponse.success(toResponse(useCase.findById(id))));
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<Facility>>> findAll(@RequestParam(required = false) String name) {
+    public ResponseEntity<ApiResponse<List<FacilityResponse>>> findAll(@RequestParam(required = false) String name) {
         List<Facility> data = (name == null || name.isBlank()) ? useCase.findAll() : useCase.findByName(name);
-        return ResponseEntity.ok(ApiResponse.success(data));
+        return ResponseEntity.ok(ApiResponse.success(data.stream().map(this::toResponse).toList()));
     }
 
     private Facility toDomain(FacilityRequest request) {
@@ -65,6 +66,16 @@ public class FacilityController {
                 request.description(),
                 request.imageUrl(),
                 request.capacity()
+        );
+    }
+
+    private FacilityResponse toResponse(Facility facility) {
+        return new FacilityResponse(
+                facility.id(),
+                facility.name(),
+                facility.description(),
+                facility.imageUrl(),
+                facility.capacity()
         );
     }
 }

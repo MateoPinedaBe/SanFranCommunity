@@ -44,7 +44,9 @@ class FacilityControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.status").value(201));
+            .andExpect(jsonPath("$.status").value(201))
+            .andExpect(jsonPath("$.data.name").value("Salon Social"))
+            .andExpect(jsonPath("$.data.capacity").value(100));
     }
 
     @Test
@@ -55,6 +57,8 @@ class FacilityControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400));
+            .andExpect(jsonPath("$.status").value(400))
+            .andExpect(jsonPath("$.data.error").value("Validation Error"))
+            .andExpect(jsonPath("$.data.field").value("name"));
     }
 }

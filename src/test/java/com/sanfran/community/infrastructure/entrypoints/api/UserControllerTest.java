@@ -75,6 +75,8 @@ class UserControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isUnprocessableEntity())
-                .andExpect(jsonPath("$.status").value(422));
+            .andExpect(jsonPath("$.status").value(422))
+            .andExpect(jsonPath("$.data.error").value("Business Rule Violation"))
+            .andExpect(jsonPath("$.data.message").value("Role must be one of: ADMIN, RESIDENT, STAFF."));
     }
 }
