@@ -8,13 +8,14 @@ import com.sanfran.community.domain.usecase.port.UserRepository;
 import com.sanfran.community.domain.usecase.port.ReservationRepository;
 import com.sanfran.community.domain.model.exception.BusinessRuleException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import com.sanfran.community.domain.usecase.IUserUseCase;
 
 import java.util.Locale;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-public class UserUseCase {
+public class UserUseCase implements IUserUseCase {
 
     private final UserRepository repository;
     private final PasswordEncoder passwordEncoder;

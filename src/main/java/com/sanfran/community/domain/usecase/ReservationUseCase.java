@@ -13,7 +13,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
-public class ReservationUseCase {
+public class ReservationUseCase implements IReservationUseCase {
 
     private final ReservationRepository repository;
     private final UserRepository userRepository;

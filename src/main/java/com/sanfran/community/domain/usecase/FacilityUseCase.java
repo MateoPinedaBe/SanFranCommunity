@@ -5,13 +5,14 @@ import com.sanfran.community.domain.model.exception.NotFoundException;
 import com.sanfran.community.domain.model.exception.ValidationException;
 import com.sanfran.community.domain.model.vo.DomainValidators;
 import com.sanfran.community.domain.usecase.port.FacilityRepository;
+import com.sanfran.community.domain.usecase.IFacilityUseCase;
 import com.sanfran.community.domain.usecase.port.ReservationRepository;
 import com.sanfran.community.domain.model.exception.BusinessRuleException;
 
 import java.util.List;
 import java.util.UUID;
 
-public class FacilityUseCase {
+public class FacilityUseCase implements IFacilityUseCase {
 
     private final FacilityRepository repository;
     private final ReservationRepository reservationRepository;

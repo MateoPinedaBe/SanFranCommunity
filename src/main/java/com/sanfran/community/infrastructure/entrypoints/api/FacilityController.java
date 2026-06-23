@@ -25,7 +25,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/facilities")
-public class FacilityController {
+public class FacilityController implements IFacilityController {
 
     private final FacilityUseCase useCase;
 

@@ -26,7 +26,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/reservations")
-public class ReservationController {
+public class ReservationController implements IReservationController {
 
     private final ReservationUseCase useCase;
 
