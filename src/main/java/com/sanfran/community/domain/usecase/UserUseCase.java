@@ -5,6 +5,8 @@ import com.sanfran.community.domain.model.exception.NotFoundException;
 import com.sanfran.community.domain.model.exception.ValidationException;
 import com.sanfran.community.domain.model.vo.DomainValidators;
 import com.sanfran.community.domain.usecase.port.UserRepository;
+import com.sanfran.community.domain.usecase.port.ReservationRepository;
+import com.sanfran.community.domain.model.exception.BusinessRuleException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Locale;
@@ -16,10 +18,12 @@ public class UserUseCase {
 
     private final UserRepository repository;
     private final PasswordEncoder passwordEncoder;
+    private final ReservationRepository reservationRepository;
 
-    public UserUseCase(UserRepository repository, PasswordEncoder passwordEncoder) {
+    public UserUseCase(UserRepository repository, PasswordEncoder passwordEncoder, ReservationRepository reservationRepository) {
         this.repository = repository;
         this.passwordEncoder = passwordEncoder;
+        this.reservationRepository = reservationRepository;
     }
 
     public User create(User user) {
@@ -70,6 +74,13 @@ public class UserUseCase {
         if (!repository.existsById(id)) {
             throw new NotFoundException("The User was not found in the database.");
         }
+        long active = reservationRepository.countActiveByUserId(id);
+        if (active > 0) {
+            throw new BusinessRuleException("No se puede eliminar el usuario porque tiene reservas activas.");
+        }
+
+        // Remove cancelled reservations referencing this user to avoid FK constraint
+        reservationRepository.deleteCancelledByUserId(id);
         repository.deleteById(id);
     }
 

@@ -15,13 +15,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class UseCaseConfig {
 
     @Bean
-    public UserUseCase userUseCase(UserRepository userRepository, PasswordEncoder passwordEncoder) {
-        return new UserUseCase(userRepository, passwordEncoder);
+    public UserUseCase userUseCase(UserRepository userRepository, PasswordEncoder passwordEncoder, ReservationRepository reservationRepository) {
+        return new UserUseCase(userRepository, passwordEncoder, reservationRepository);
     }
 
     @Bean
-    public FacilityUseCase facilityUseCase(FacilityRepository facilityRepository) {
-        return new FacilityUseCase(facilityRepository);
+    public FacilityUseCase facilityUseCase(FacilityRepository facilityRepository, ReservationRepository reservationRepository) {
+        return new FacilityUseCase(facilityRepository, reservationRepository);
     }
 
     @Bean

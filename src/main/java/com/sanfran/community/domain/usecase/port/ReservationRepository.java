@@ -22,4 +22,16 @@ public interface ReservationRepository {
     List<Reservation> findByDate(LocalDate date);
 
     boolean existsConflict(UUID facilityId, LocalDate date, LocalTime startTime, LocalTime endTime, UUID excludedReservationId);
+
+    // Counts reservations for a user that are not cancelled
+    long countActiveByUserId(UUID userId);
+
+    // Counts reservations for a facility that are not cancelled
+    long countActiveByFacilityId(UUID facilityId);
+
+    // Delete reservations that are cancelled for a given user
+    void deleteCancelledByUserId(UUID userId);
+
+    // Delete reservations that are cancelled for a given facility
+    void deleteCancelledByFacilityId(UUID facilityId);
 }

@@ -5,6 +5,8 @@ import com.sanfran.community.domain.model.exception.NotFoundException;
 import com.sanfran.community.domain.model.exception.ValidationException;
 import com.sanfran.community.domain.model.vo.DomainValidators;
 import com.sanfran.community.domain.usecase.port.FacilityRepository;
+import com.sanfran.community.domain.usecase.port.ReservationRepository;
+import com.sanfran.community.domain.model.exception.BusinessRuleException;
 
 import java.util.List;
 import java.util.UUID;
@@ -12,9 +14,11 @@ import java.util.UUID;
 public class FacilityUseCase {
 
     private final FacilityRepository repository;
+    private final ReservationRepository reservationRepository;
 
-    public FacilityUseCase(FacilityRepository repository) {
+    public FacilityUseCase(FacilityRepository repository, ReservationRepository reservationRepository) {
         this.repository = repository;
+        this.reservationRepository = reservationRepository;
     }
 
     public Facility create(Facility facility) {
@@ -41,6 +45,13 @@ public class FacilityUseCase {
         if (!repository.existsById(id)) {
             throw new NotFoundException("The Facility was not found in the database.");
         }
+        long active = reservationRepository.countActiveByFacilityId(id);
+        if (active > 0) {
+            throw new BusinessRuleException("No se puede eliminar la instalación porque tiene reservas activas.");
+        }
+
+        // Remove cancelled reservations referencing this facility to avoid FK constraint
+        reservationRepository.deleteCancelledByFacilityId(id);
         repository.deleteById(id);
     }
 

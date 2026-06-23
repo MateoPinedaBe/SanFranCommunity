@@ -64,6 +64,26 @@ public class ReservationRepositoryAdapter implements ReservationRepository {
         return repository.existsConflict(facilityId, date, startTime, endTime, excludedReservationId);
     }
 
+    @Override
+    public long countActiveByUserId(UUID userId) {
+        return repository.countActiveByUserId(userId);
+    }
+
+    @Override
+    public long countActiveByFacilityId(UUID facilityId) {
+        return repository.countActiveByFacilityId(facilityId);
+    }
+
+    @Override
+    public void deleteCancelledByUserId(UUID userId) {
+        repository.deleteCancelledByUserId(userId);
+    }
+
+    @Override
+    public void deleteCancelledByFacilityId(UUID facilityId) {
+        repository.deleteCancelledByFacilityId(facilityId);
+    }
+
     private ReservationJpaEntity toEntity(Reservation reservation) {
         ReservationJpaEntity entity = new ReservationJpaEntity();
         entity.setId(reservation.id());
