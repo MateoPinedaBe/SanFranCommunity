@@ -5,6 +5,7 @@ import com.sanfran.community.domain.model.exception.BusinessRuleException;
 import com.sanfran.community.domain.model.exception.NotFoundException;
 import com.sanfran.community.domain.model.exception.ValidationException;
 import com.sanfran.community.domain.usecase.UserUseCase;
+import com.sanfran.community.infrastructure.entrypoints.api.dto.UpdateUserRequest;
 import com.sanfran.community.infrastructure.entrypoints.api.dto.UserRequest;
 import com.sanfran.community.infrastructure.entrypoints.api.dto.UserResponse;
 import jakarta.validation.Valid;
@@ -40,7 +41,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<UserResponse>> update(@PathVariable UUID id, @Valid @RequestBody UserRequest request) {
+    public ResponseEntity<ApiResponse<UserResponse>> update(@PathVariable UUID id, @Valid @RequestBody UpdateUserRequest request) {
         User updated = useCase.update(id, toDomain(request));
         return ResponseEntity.ok(ApiResponse.success(toResponse(updated)));
     }
@@ -49,7 +50,7 @@ public class UserController {
     public ResponseEntity<ApiResponse<UserResponse>> updateByQuery(
             @RequestParam(required = false) UUID id,
             @RequestParam(required = false) String names,
-            @Valid @RequestBody UserRequest request
+            @Valid @RequestBody UpdateUserRequest request
     ) {
         UUID resolvedId = resolveUserIdByQuery(id, names, "update");
         User updated = useCase.update(resolvedId, toDomain(request));
@@ -80,10 +81,15 @@ public class UserController {
     @GetMapping
     public ResponseEntity<ApiResponse<?>> findAll(
             @RequestParam(required = false) UUID id,
-            @RequestParam(required = false) String names
+            @RequestParam(required = false) String names,
+            @RequestParam(required = false) String email
     ) {
         if (id != null) {
             return ResponseEntity.ok(ApiResponse.success(toResponse(useCase.findById(id))));
+        }
+
+        if (email != null && !email.isBlank()) {
+            return ResponseEntity.ok(ApiResponse.success(useCase.findByEmail(email).stream().map(this::toResponse).toList()));
         }
 
         List<User> data = (names == null || names.isBlank()) ? useCase.findAll() : useCase.findByNames(names);
@@ -91,6 +97,18 @@ public class UserController {
     }
 
     private User toDomain(UserRequest request) {
+        return new User(
+                null,
+                request.names(),
+                request.idDocument(),
+                request.email(),
+                request.password(),
+                request.role(),
+                request.subRole()
+        );
+    }
+
+    private User toDomain(UpdateUserRequest request) {
         return new User(
                 null,
                 request.names(),

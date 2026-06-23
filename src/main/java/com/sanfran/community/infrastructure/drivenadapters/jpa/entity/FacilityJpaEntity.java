@@ -23,7 +23,7 @@ public class FacilityJpaEntity {
     @Column(nullable = false, length = 500)
     private String description;
 
-    @Column(name = "image_url", nullable = false, length = 500)
+    @Column(name = "image_url", nullable = false, columnDefinition = "TEXT")
     private String imageUrl;
 
     @Column(nullable = false)

@@ -34,6 +34,9 @@ public class ReservationJpaEntity {
     @Column(name = "end_time", nullable = false)
     private LocalTime endTime;
 
+    @Column(nullable = false, length = 20)
+    private String status;
+
     public UUID getId() {
         return id;
     }
@@ -80,5 +83,13 @@ public class ReservationJpaEntity {
 
     public void setEndTime(LocalTime endTime) {
         this.endTime = endTime;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

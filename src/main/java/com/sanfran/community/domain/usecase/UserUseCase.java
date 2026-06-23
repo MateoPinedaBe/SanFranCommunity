@@ -31,21 +31,33 @@ public class UserUseCase {
 
     public User update(UUID id, User user) {
         if (id == null) {
-            throw new ValidationException("id", "ID must not be null.");
+            throw new ValidationException("id", "El ID no debe ser nulo.");
         }
 
-        User normalizedUser = normalized(user);
+        User existing = repository.findById(id)
+                .orElseThrow(() -> new NotFoundException("El usuario no se encontró en la base de datos."));
+
+        // If password is null, keep the existing password
+        User userWithPassword = new User(
+                user.id(),
+                user.names(),
+                user.idDocument(),
+                user.email(),
+                user.password() == null ? existing.password() : user.password(),
+                user.role(),
+                user.subRole()
+        );
+
+        User normalizedUser = normalized(userWithPassword);
         DomainValidators.validateUser(normalizedUser);
         ensureUniqueConstraints(normalizedUser, id);
-        repository.findById(id)
-                .orElseThrow(() -> new NotFoundException("The User was not found in the database."));
 
         return repository.save(new User(
             id,
             normalizedUser.names(),
             normalizedUser.idDocument(),
             normalizedUser.email(),
-            normalizedUser.password(),
+            user.password() == null ? existing.password() : normalizedUser.password(),
             normalizedUser.role(),
             normalizedUser.subRole()
         ));
@@ -78,6 +90,15 @@ public class UserUseCase {
             throw new ValidationException("names", "Name must not be blank.");
         }
         return repository.findByNamesContainingIgnoreCase(names);
+    }
+
+    public List<User> findByEmail(String email) {
+        if (email == null || email.isBlank()) {
+            throw new ValidationException("email", "Email must not be blank.");
+        }
+        return repository.findByEmailIgnoreCase(email.trim().toLowerCase(Locale.ROOT))
+                .map(List::of)
+                .orElse(List.of());
     }
 
     private void ensureUniqueConstraints(User user, UUID currentId) {

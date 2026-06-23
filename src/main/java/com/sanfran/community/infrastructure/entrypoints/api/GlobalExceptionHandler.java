@@ -18,7 +18,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<ErrorResponse>> handleValidationException(ValidationException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(ApiResponse.error(400, new ErrorResponse(
-                        "Validation Error",
+                        "Error de validación",
                         ex.getField(),
                         ex.getMessage()
                 )));
@@ -28,7 +28,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<ErrorResponse>> handleBusinessRuleException(BusinessRuleException ex) {
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
                 .body(ApiResponse.error(422, new ErrorResponse(
-                        "Business Rule Violation",
+                        "Error de regla de negocio",
                         null,
                         ex.getMessage()
                 )));
@@ -38,7 +38,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<ErrorResponse>> handleNotFoundException(NotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(ApiResponse.error(404, new ErrorResponse(
-                        "Not Found",
+                        "No encontrado",
                         null,
                         ex.getMessage()
                 )));
@@ -51,16 +51,16 @@ public class GlobalExceptionHandler {
         String field = ex.getBindingResult().getFieldErrors().stream()
                 .findFirst()
                 .map(error -> error.getField())
-                .orElse("request");
+                .orElse("solicitud");
 
         String message = ex.getBindingResult().getFieldErrors().stream()
                 .findFirst()
                 .map(error -> error.getDefaultMessage())
-                .orElse("Request validation failed.");
+                .orElse("Error de validación de la solicitud.");
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(ApiResponse.error(400, new ErrorResponse(
-                        "Validation Error",
+                        "Error de validación",
                         field,
                         message
                 )));
@@ -72,7 +72,7 @@ public class GlobalExceptionHandler {
     ) {
         return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
                 .body(ApiResponse.error(405, new ErrorResponse(
-                        "Method Not Allowed",
+                        "Método no permitido",
                         null,
                         ex.getMessage()
                 )));
@@ -87,16 +87,16 @@ public class GlobalExceptionHandler {
                 : ex.getMessage();
 
         if (message != null && message.contains("FK_RESERVATIONS_FACILITY")) {
-            message = "Cannot delete facility because it has associated reservations.";
+            message = "No se puede eliminar la instalación porque tiene reservas asociadas.";
         } else if (message != null && message.contains("FK_RESERVATIONS_USER")) {
-            message = "Cannot delete user because it has associated reservations.";
+            message = "No se puede eliminar el usuario porque tiene reservas asociadas.";
         }
 
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(ApiResponse.error(409, new ErrorResponse(
-                        "Data Integrity Violation",
+                        "Violación de integridad de datos",
                         null,
-                        message != null ? message : "Operation violates data integrity constraints."
+                        message != null ? message : "La operación viola las restricciones de integridad de datos."
                 )));
     }
 
@@ -104,9 +104,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<ErrorResponse>> handleGeneralException(Exception ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ApiResponse.error(500, new ErrorResponse(
-                        "Internal Server Error",
+                        "Error interno del servidor",
                         null,
-                        ex.getMessage() != null ? ex.getMessage() : "An unexpected error occurred"
+                        ex.getMessage() != null ? ex.getMessage() : "Ocurrió un error inesperado"
                 )));
     }
 }

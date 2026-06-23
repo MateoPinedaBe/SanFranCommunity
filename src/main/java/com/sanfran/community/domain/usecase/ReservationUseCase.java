@@ -30,49 +30,53 @@ public class ReservationUseCase {
     }
 
     public Reservation create(Reservation reservation) {
-        DomainValidators.validateReservation(reservation);
-        ensureReferencesExist(reservation);
-        ensureNoConflict(reservation, null);
-        return repository.save(reservation);
+        // Ensure status default
+        Reservation r = reservation.status() == null ? new Reservation(
+                reservation.id(), reservation.userId(), reservation.facilityId(), reservation.date(), reservation.startTime(), reservation.endTime(), com.sanfran.community.domain.model.entity.ReservationStatus.PENDING
+        ) : reservation;
+        DomainValidators.validateReservation(r);
+        ensureReferencesExist(r);
+        ensureNoConflict(r, null);
+        return repository.save(r);
     }
 
     public Reservation update(UUID id, Reservation reservation) {
         if (id == null) {
-            throw new ValidationException("id", "ID must not be null.");
+            throw new ValidationException("id", "El ID no debe ser nulo.");
         }
 
         DomainValidators.validateReservation(reservation);
     ensureReferencesExist(reservation);
     ensureNoConflict(reservation, id);
         repository.findById(id)
-                .orElseThrow(() -> new NotFoundException("The Reservation was not found in the database."));
-
+                .orElseThrow(() -> new NotFoundException("La reserva no se encontró en la base de datos."));
     return repository.save(new Reservation(
         id,
         reservation.userId(),
         reservation.facilityId(),
         reservation.date(),
         reservation.startTime(),
-        reservation.endTime()
+        reservation.endTime(),
+        reservation.status()
     ));
     }
 
     public void delete(UUID id) {
         if (id == null) {
-            throw new ValidationException("id", "ID must not be null.");
+            throw new ValidationException("id", "El ID no debe ser nulo.");
         }
         if (!repository.existsById(id)) {
-            throw new NotFoundException("The Reservation was not found in the database.");
+            throw new NotFoundException("La reserva no se encontró en la base de datos.");
         }
         repository.deleteById(id);
     }
 
     public Reservation findById(UUID id) {
         if (id == null) {
-            throw new ValidationException("id", "ID must not be null.");
+            throw new ValidationException("id", "El ID no debe ser nulo.");
         }
         return repository.findById(id)
-                .orElseThrow(() -> new NotFoundException("The Reservation was not found in the database."));
+                .orElseThrow(() -> new NotFoundException("La reserva no se encontró en la base de datos."));
     }
 
     public List<Reservation> findAll() {
@@ -81,18 +85,18 @@ public class ReservationUseCase {
 
     public List<Reservation> findByDate(LocalDate date) {
         if (date == null) {
-            throw new ValidationException("date", "Date must not be null.");
+            throw new ValidationException("date", "La fecha no debe ser nula.");
         }
         return repository.findByDate(date);
     }
 
     private void ensureReferencesExist(Reservation reservation) {
         if (!userRepository.existsById(reservation.userId())) {
-            throw new NotFoundException("The User was not found in the database.");
+            throw new NotFoundException("El usuario no se encontró en la base de datos.");
         }
 
         if (!facilityRepository.existsById(reservation.facilityId())) {
-            throw new NotFoundException("The Facility was not found in the database.");
+            throw new NotFoundException("La instalación no se encontró en la base de datos.");
         }
     }
 
@@ -106,7 +110,7 @@ public class ReservationUseCase {
         );
 
         if (conflict) {
-            throw new BusinessRuleException("The facility is already reserved for the selected time range.");
+            throw new BusinessRuleException("La instalación ya está reservada para el rango de horario seleccionado.");
         }
     }
 }

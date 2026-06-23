@@ -10,6 +10,7 @@ public record Reservation(
         UUID facilityId,
         LocalDate date,
         LocalTime startTime,
-        LocalTime endTime
+        LocalTime endTime,
+        ReservationStatus status
 ) {
 }

@@ -5,6 +5,7 @@ import com.sanfran.community.domain.model.exception.ValidationException;
 import com.sanfran.community.domain.usecase.ReservationUseCase;
 import com.sanfran.community.infrastructure.entrypoints.api.dto.ReservationRequest;
 import com.sanfran.community.infrastructure.entrypoints.api.dto.ReservationResponse;
+import com.sanfran.community.infrastructure.entrypoints.api.dto.UpdateReservationRequest;
 import jakarta.validation.Valid;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -42,19 +43,21 @@ public class ReservationController {
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<ReservationResponse>> update(
             @PathVariable UUID id,
-            @Valid @RequestBody ReservationRequest request
+            @Valid @RequestBody UpdateReservationRequest request
     ) {
-        Reservation updated = useCase.update(id, toDomain(request));
+        Reservation existing = useCase.findById(id);
+        Reservation updated = useCase.update(id, toDomainUpdate(existing, request));
         return ResponseEntity.ok(ApiResponse.success(toResponse(updated)));
     }
 
     @PutMapping
     public ResponseEntity<ApiResponse<ReservationResponse>> updateByQuery(
             @RequestParam(required = false) UUID id,
-            @Valid @RequestBody ReservationRequest request
+            @Valid @RequestBody UpdateReservationRequest request
     ) {
         UUID resolvedId = resolveReservationId(id, "update");
-        Reservation updated = useCase.update(resolvedId, toDomain(request));
+        Reservation existing = useCase.findById(resolvedId);
+        Reservation updated = useCase.update(resolvedId, toDomainUpdate(existing, request));
         return ResponseEntity.ok(ApiResponse.success(toResponse(updated)));
     }
 
@@ -96,7 +99,20 @@ public class ReservationController {
                 request.facilityId(),
                 request.date(),
                 request.startTime(),
-                request.endTime()
+                request.endTime(),
+                request.status() == null ? com.sanfran.community.domain.model.entity.ReservationStatus.PENDING : com.sanfran.community.domain.model.entity.ReservationStatus.valueOf(request.status())
+        );
+    }
+
+    private Reservation toDomainUpdate(Reservation existing, UpdateReservationRequest request) {
+        return new Reservation(
+                null,
+                existing.userId(),
+                existing.facilityId(),
+                request.date(),
+                request.startTime(),
+                request.endTime(),
+                request.status() == null ? existing.status() : com.sanfran.community.domain.model.entity.ReservationStatus.valueOf(request.status())
         );
     }
 
@@ -107,7 +123,8 @@ public class ReservationController {
                 reservation.facilityId(),
                 reservation.date(),
                 reservation.startTime(),
-                reservation.endTime()
+                reservation.endTime(),
+                reservation.status() == null ? "PENDING" : reservation.status().name()
         );
     }
 

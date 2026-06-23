@@ -20,7 +20,8 @@ public interface ReservationJpaRepository extends JpaRepository<ReservationJpaEn
                             and r.date = :date
                             and (:excludedReservationId is null or r.id <> :excludedReservationId)
                             and r.startTime < :endTime
-                            and r.endTime > :startTime
+                                and r.endTime > :startTime
+                                and (r.status is null or r.status <> 'CANCELLED')
                         """)
         boolean existsConflict(
                         @Param("facilityId") UUID facilityId,

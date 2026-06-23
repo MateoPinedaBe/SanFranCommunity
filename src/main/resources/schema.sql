@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS facilities (
     id UUID DEFAULT RANDOM_UUID() PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     description VARCHAR(500) NOT NULL,
-    image_url VARCHAR(500) NOT NULL,
+    image_url TEXT NOT NULL,
     capacity INT NOT NULL
 );
 
@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS reservations (
     date DATE NOT NULL,
     start_time TIME NOT NULL,
     end_time TIME NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'PENDING',
     CONSTRAINT fk_reservations_user FOREIGN KEY (user_id) REFERENCES users(id),
     CONSTRAINT fk_reservations_facility FOREIGN KEY (facility_id) REFERENCES facilities(id)
 );

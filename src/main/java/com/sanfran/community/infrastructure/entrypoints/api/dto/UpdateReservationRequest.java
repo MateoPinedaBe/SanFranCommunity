@@ -5,20 +5,14 @@ import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.UUID;
 
-public record ReservationRequest(
-        @Schema(description = "Identifier of the user that creates the reservation")
-        @NotNull UUID userId,
-        @Schema(description = "Identifier of the reserved facility")
-        @NotNull UUID facilityId,
+public record UpdateReservationRequest(
         @Schema(description = "Reservation date", example = "2026-05-10")
         @NotNull LocalDate date,
         @Schema(description = "Reservation start time", example = "09:00:00")
         @NotNull LocalTime startTime,
         @Schema(description = "Reservation end time", example = "11:00:00")
-        @NotNull LocalTime endTime
-        ,
+        @NotNull LocalTime endTime,
         @Schema(description = "Reservation status", example = "PENDING")
         String status
 ) {

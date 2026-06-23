@@ -72,6 +72,7 @@ public class ReservationRepositoryAdapter implements ReservationRepository {
         entity.setDate(reservation.date());
         entity.setStartTime(reservation.startTime());
         entity.setEndTime(reservation.endTime());
+        entity.setStatus(reservation.status() != null ? reservation.status().name() : "PENDING");
         return entity;
     }
 
@@ -82,7 +83,8 @@ public class ReservationRepositoryAdapter implements ReservationRepository {
             entity.getFacilityId(),
                 entity.getDate(),
                 entity.getStartTime(),
-                entity.getEndTime()
+                entity.getEndTime(),
+                entity.getStatus() == null ? com.sanfran.community.domain.model.entity.ReservationStatus.PENDING : com.sanfran.community.domain.model.entity.ReservationStatus.valueOf(entity.getStatus())
         );
     }
 }

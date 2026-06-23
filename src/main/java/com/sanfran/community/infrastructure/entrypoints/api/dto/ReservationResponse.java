@@ -19,5 +19,8 @@ public record ReservationResponse(
         LocalTime startTime,
         @Schema(description = "Reservation end time")
         LocalTime endTime
+        ,
+        @Schema(description = "Reservation status")
+        String status
 ) {
 }
